@@ -1,317 +1,380 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>고급 공학용 계산기</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>계산기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #1a222d;
+      --key: #2a3544;
+      --key-hover: #354256;
+      --key-active: #1e2733;
+      --accent: #3d9cf5;
+      --accent-hover: #5aadff;
+      --accent-active: #2b8ae0;
+      --danger: #e85d5d;
+      --danger-hover: #f07070;
+      --text: #e8eef5;
+      --muted: #8b9cb3;
+      --radius: 14px;
+      --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
 
-        :root {
-            --bg-color: #f8fafc;
-            --calc-bg: #ffffff;
-            --display-bg: #f1f5f9;
-            --btn-num: #ffffff;
-            --btn-op: #e2e8f0;
-            --btn-sci: #dbeafe;
-            --btn-eq: #3b82f6;
-            --text-main: #1e293b;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
+    body {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: "Noto Sans KR", system-ui, sans-serif;
+      background: radial-gradient(ellipse 120% 80% at 50% -20%, #1a3048 0%, var(--bg) 55%);
+      color: var(--text);
+    }
 
-        .calculator-card {
-            background: var(--calc-bg);
-            width: 100%;
-            max-width: 400px;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            overflow: hidden;
-            padding: 24px;
-        }
+    .calc {
+      width: min(100%, 360px);
+      background: var(--panel);
+      border-radius: calc(var(--radius) + 6px);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
 
-        .display-area {
-            background: var(--display-bg);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
-            text-align: right;
-            min-height: 110px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            word-break: break-all;
-        }
+    .display-wrap {
+      margin-bottom: 18px;
+      padding: 16px 18px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      min-height: 96px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+      gap: 6px;
+    }
 
-        .formula-display {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: #64748b;
-            margin-bottom: 4px;
-            min-height: 1.2em;
-        }
+    .expression {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.85rem;
+      color: var(--muted);
+      min-height: 1.2em;
+      word-break: break-all;
+      text-align: right;
+      width: 100%;
+    }
 
-        .result-display {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 2.2rem;
-            font-weight: 600;
-            color: var(--text-main);
-            overflow-x: auto;
-            white-space: nowrap;
-        }
+    .result {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 2.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      word-break: break-all;
+      text-align: right;
+      width: 100%;
+      line-height: 1.15;
+    }
 
-        .btn-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
 
-        .calc-btn {
-            border: none;
-            border-radius: 12px;
-            padding: 16px 0;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            user-select: none;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
+    button {
+      font-family: inherit;
+      font-size: 1.15rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      padding: 18px 8px;
+      cursor: pointer;
+      color: var(--text);
+      background: var(--key);
+      transition: background 0.12s ease, transform 0.08s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        .calc-btn:active {
-            transform: scale(0.95);
-            opacity: 0.8;
-        }
+    button:hover {
+      background: var(--key-hover);
+    }
 
-        .btn-num { background: var(--btn-num); color: var(--text-main); border: 1px solid #e2e8f0; }
-        .btn-num:hover { background: #f1f5f9; }
+    button:active {
+      transform: scale(0.97);
+      background: var(--key-active);
+    }
 
-        .btn-op { background: var(--btn-op); color: var(--text-main); font-weight: 600; }
-        .btn-op:hover { background: #cbd5e1; }
+    button.span-2 {
+      grid-column: span 2;
+    }
 
-        .btn-sci { background: var(--btn-sci); color: #1e40af; font-size: 0.95rem; }
-        .btn-sci:hover { background: #bfdbfe; }
+    button.accent {
+      background: var(--accent);
+      color: #fff;
+    }
 
-        .btn-eq { background: var(--btn-eq); color: white; grid-column: span 1; }
-        .btn-eq:hover { background: #2563eb; }
+    button.accent:hover {
+      background: var(--accent-hover);
+    }
 
-        .btn-clear { color: #ef4444; background: #fee2e2; }
-        .btn-clear:hover { background: #fecaca; }
+    button.accent:active {
+      background: var(--accent-active);
+    }
 
-        .mode-indicator {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #94a3b8;
-            margin-bottom: 4px;
-            font-weight: 700;
-        }
+    button.danger {
+      background: rgba(232, 93, 93, 0.2);
+      color: var(--danger);
+    }
 
-        /* Responsive adjustments */
-        @media (max-width: 350px) {
-            .calc-btn { padding: 12px 0; font-size: 1rem; }
-            .result-display { font-size: 1.8rem; }
-        }
-    </style>
+    button.danger:hover {
+      background: rgba(232, 93, 93, 0.35);
+      color: var(--danger-hover);
+    }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 <body>
-
-<div class="calculator-card">
-    <div class="display-area">
-        <div class="mode-indicator" id="angleMode">Deg</div>
-        <div class="formula-display" id="formula"></div>
-        <div class="result-display" id="result">0</div>
+  <div class="calc" role="application" aria-label="계산기">
+    <div class="display-wrap">
+      <div class="expression" id="expr" aria-live="polite"></div>
+      <div class="result" id="display" aria-live="assertive">0</div>
     </div>
+    <div class="keys">
+      <button type="button" class="danger" data-action="clear">AC</button>
+      <button type="button" data-action="sign">±</button>
+      <button type="button" data-action="percent">%</button>
+      <button type="button" class="accent" data-op="/">÷</button>
 
-    <div class="btn-grid">
-        <!-- Scientific Row 1 -->
-        <button class="calc-btn btn-sci" onclick="toggleAngleMode()">Deg/Rad</button>
-        <button class="calc-btn btn-sci" onclick="inputFunc('sin')">sin</button>
-        <button class="calc-btn btn-sci" onclick="inputFunc('cos')">cos</button>
-        <button class="calc-btn btn-sci" onclick="inputFunc('tan')">tan</button>
+      <button type="button" data-digit="7">7</button>
+      <button type="button" data-digit="8">8</button>
+      <button type="button" data-digit="9">9</button>
+      <button type="button" class="accent" data-op="*">×</button>
 
-        <!-- Scientific Row 2 -->
-        <button class="calc-btn btn-sci" onclick="inputOp('**')">xʸ</button>
-        <button class="calc-btn btn-sci" onclick="inputFunc('log')">log</button>
-        <button class="calc-btn btn-sci" onclick="inputFunc('ln')">ln</button>
-        <button class="calc-btn btn-sci" onclick="inputFunc('sqrt')">√</button>
+      <button type="button" data-digit="4">4</button>
+      <button type="button" data-digit="5">5</button>
+      <button type="button" data-digit="6">6</button>
+      <button type="button" class="accent" data-op="-">−</button>
 
-        <!-- Main Keys -->
-        <button class="calc-btn btn-clear" onclick="clearDisplay()">AC</button>
-        <button class="calc-btn btn-op" onclick="deleteLast()"><i class="fas fa-backspace"></i></button>
-        <button class="calc-btn btn-op" onclick="inputOp('%')">%</button>
-        <button class="calc-btn btn-op" onclick="inputOp('/')">÷</button>
+      <button type="button" data-digit="1">1</button>
+      <button type="button" data-digit="2">2</button>
+      <button type="button" data-digit="3">3</button>
+      <button type="button" class="accent" data-op="+">+</button>
 
-        <button class="calc-btn btn-num" onclick="inputDigit('7')">7</button>
-        <button class="calc-btn btn-num" onclick="inputDigit('8')">8</button>
-        <button class="calc-btn btn-num" onclick="inputDigit('9')">9</button>
-        <button class="calc-btn btn-op" onclick="inputOp('*')">×</button>
-
-        <button class="calc-btn btn-num" onclick="inputDigit('4')">4</button>
-        <button class="calc-btn btn-num" onclick="inputDigit('5')">5</button>
-        <button class="calc-btn btn-num" onclick="inputDigit('6')">6</button>
-        <button class="calc-btn btn-op" onclick="inputOp('-')">-</button>
-
-        <button class="calc-btn btn-num" onclick="inputDigit('1')">1</button>
-        <button class="calc-btn btn-num" onclick="inputDigit('2')">2</button>
-        <button class="calc-btn btn-num" onclick="inputDigit('3')">3</button>
-        <button class="calc-btn btn-op" onclick="inputOp('+')">+</button>
-
-        <button class="calc-btn btn-num" onclick="inputDigit('0')">0</button>
-        <button class="calc-btn btn-num" onclick="inputDigit('.')">.</button>
-        <button class="calc-btn btn-sci" onclick="inputConst('PI')">π</button>
-        <button class="calc-btn btn-eq" onclick="calculate()">=</button>
+      <button type="button" class="span-2" data-digit="0">0</button>
+      <button type="button" data-action="dot">.</button>
+      <button type="button" class="accent" data-action="equals">=</button>
     </div>
-</div>
+    <p class="hint">키보드: 숫자 · 연산 · Enter(=) · Esc(AC) · Backspace</p>
+  </div>
 
-<script>
-    let currentInput = '0';
-    let formula = '';
-    let isDegree = true;
-    let shouldReset = false;
+  <script>
+    (function () {
+      const display = document.getElementById("display");
+      const exprEl = document.getElementById("expr");
 
-    const resultEl = document.getElementById('result');
-    const formulaEl = document.getElementById('formula');
-    const angleModeEl = document.getElementById('angleMode');
+      let displayStr = "0";
+      let stored = null;
+      let pendingOp = null;
+      let fresh = true;
 
-    function updateDisplay() {
-        resultEl.innerText = currentInput;
-        formulaEl.innerText = formula;
-    }
+      const opSymbols = { "+": "+", "-": "−", "*": "×", "/": "÷" };
 
-    function inputDigit(digit) {
-        if (shouldReset) {
-            currentInput = digit;
-            shouldReset = false;
+      function formatNum(n) {
+        if (!Number.isFinite(n)) return "오류";
+        const s = String(n);
+        if (s.length > 12) {
+          const exp = n.toExponential(6);
+          return exp.length > 12 ? n.toExponential(4) : exp;
+        }
+        return s;
+      }
+
+      function parseDisplay() {
+        const v = parseFloat(displayStr.replace(/,/g, ""));
+        return Number.isFinite(v) ? v : 0;
+      }
+
+      function updateExpr() {
+        if (stored !== null && pendingOp) {
+          exprEl.textContent = `${formatNum(stored)} ${opSymbols[pendingOp] || pendingOp}`;
         } else {
-            if (currentInput === '0' && digit !== '.') {
-                currentInput = digit;
-            } else {
-                if (digit === '.' && currentInput.includes('.')) return;
-                currentInput += digit;
-            }
+          exprEl.textContent = "";
         }
-        updateDisplay();
-    }
+      }
 
-    function inputOp(op) {
-        if (shouldReset) shouldReset = false;
-        
-        // Handle repeated operators
-        const lastChar = currentInput.slice(-1);
-        if (['+', '-', '*', '/', '%', '**'].includes(lastChar)) {
-            currentInput = currentInput.slice(0, -1) + op;
+      function render() {
+        display.textContent = displayStr;
+        updateExpr();
+      }
+
+      function applyOp(a, op, b) {
+        switch (op) {
+          case "+":
+            return a + b;
+          case "-":
+            return a - b;
+          case "*":
+            return a * b;
+          case "/":
+            return b === 0 ? NaN : a / b;
+          default:
+            return b;
+        }
+      }
+
+      function ensureClearError() {
+        if (displayStr === "오류") clearAll();
+      }
+
+      function inputDigit(d) {
+        ensureClearError();
+        if (fresh) {
+          displayStr = d === "0" ? "0" : d;
+          fresh = false;
         } else {
-            currentInput += op;
+          if (displayStr === "0" && d !== ".") displayStr = d;
+          else if (displayStr.replace(".", "").length < 14) displayStr += d;
         }
-        updateDisplay();
-    }
+        render();
+      }
 
-    function inputConst(name) {
-        const val = name === 'PI' ? Math.PI : Math.E;
-        if (currentInput === '0' || shouldReset) {
-            currentInput = val.toString();
-            shouldReset = false;
+      function inputDot() {
+        ensureClearError();
+        if (fresh) {
+          displayStr = "0.";
+          fresh = false;
+        } else if (!displayStr.includes(".")) {
+          displayStr += ".";
+        }
+        render();
+      }
+
+      function setOp(op) {
+        if (displayStr === "오류") {
+          clearAll();
+          return;
+        }
+        const current = parseDisplay();
+        if (stored !== null && pendingOp && !fresh) {
+          const result = applyOp(stored, pendingOp, current);
+          displayStr = formatNum(result);
+          stored = Number.isFinite(result) ? result : null;
         } else {
-            currentInput += val.toString();
+          stored = current;
         }
-        updateDisplay();
-    }
+        pendingOp = op;
+        fresh = true;
+        if (!Number.isFinite(parseDisplay())) displayStr = "오류";
+        render();
+      }
 
-    function inputFunc(func) {
-        try {
-            let val = parseFloat(currentInput);
-            let res = 0;
+      function equals() {
+        if (displayStr === "오류") return;
+        if (stored === null || !pendingOp) return;
+        const current = parseDisplay();
+        const result = applyOp(stored, pendingOp, current);
+        displayStr = formatNum(result);
+        exprEl.textContent = `${formatNum(stored)} ${opSymbols[pendingOp]} ${formatNum(current)} =`;
+        stored = null;
+        pendingOp = null;
+        fresh = true;
+        render();
+      }
 
-            // Convert degree to radian if needed
-            let angle = isDegree ? (val * Math.PI / 180) : val;
+      function clearAll() {
+        displayStr = "0";
+        stored = null;
+        pendingOp = null;
+        fresh = true;
+        render();
+      }
 
-            switch(func) {
-                case 'sin': res = Math.sin(angle); break;
-                case 'cos': res = Math.cos(angle); break;
-                case 'tan': res = Math.tan(angle); break;
-                case 'log': res = Math.log10(val); break;
-                case 'ln': res = Math.log(val); break;
-                case 'sqrt': res = Math.sqrt(val); break;
-            }
+      function toggleSign() {
+        if (displayStr === "오류") return clearAll();
+        const n = parseDisplay();
+        displayStr = formatNum(-n);
+        fresh = false;
+        render();
+      }
 
-            formula = `${func}(${currentInput})`;
-            currentInput = Number(res.toFixed(10)).toString();
-            shouldReset = true;
-            updateDisplay();
-        } catch (e) {
-            currentInput = "Error";
-            updateDisplay();
+      function percent() {
+        if (displayStr === "오류") return;
+        const n = parseDisplay();
+        displayStr = formatNum(n / 100);
+        fresh = false;
+        render();
+      }
+
+      function backspace() {
+        if (fresh || displayStr === "오류") return;
+        if (displayStr.length <= 1) displayStr = "0";
+        else displayStr = displayStr.slice(0, -1);
+        render();
+      }
+
+      document.querySelector(".calc").addEventListener("click", function (e) {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const d = btn.getAttribute("data-digit");
+        const op = btn.getAttribute("data-op");
+        const act = btn.getAttribute("data-action");
+        if (d !== null) inputDigit(d);
+        else if (op) setOp(op);
+        else if (act === "dot") inputDot();
+        else if (act === "equals") equals();
+        else if (act === "clear") clearAll();
+        else if (act === "sign") toggleSign();
+        else if (act === "percent") percent();
+      });
+
+      window.addEventListener("keydown", function (e) {
+        if (e.key >= "0" && e.key <= "9") {
+          e.preventDefault();
+          inputDigit(e.key);
+        } else if (e.key === ".") {
+          e.preventDefault();
+          inputDot();
+        } else if (e.key === "+" || e.key === "-") {
+          e.preventDefault();
+          setOp(e.key);
+        } else if (e.key === "*") {
+          e.preventDefault();
+          setOp("*");
+        } else if (e.key === "/") {
+          e.preventDefault();
+          setOp("/");
+        } else if (e.key === "Enter" || e.key === "=") {
+          e.preventDefault();
+          equals();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          clearAll();
+        } else if (e.key === "Backspace") {
+          e.preventDefault();
+          backspace();
         }
-    }
+      });
 
-    function toggleAngleMode() {
-        isDegree = !isDegree;
-        angleModeEl.innerText = isDegree ? 'Deg' : 'Rad';
-    }
-
-    function clearDisplay() {
-        currentInput = '0';
-        formula = '';
-        shouldReset = false;
-        updateDisplay();
-    }
-
-    function deleteLast() {
-        if (currentInput.length > 1) {
-            currentInput = currentInput.slice(0, -1);
-        } else {
-            currentInput = '0';
-        }
-        updateDisplay();
-    }
-
-    function calculate() {
-        try {
-            // Replace display symbols for evaluation
-            let expression = currentInput.replace(/×/g, '*').replace(/÷/g, '/');
-            
-            // Basic safety check for eval
-            const result = eval(expression);
-            
-            formula = currentInput + ' =';
-            currentInput = Number(result.toFixed(10)).toString();
-            shouldReset = true;
-            updateDisplay();
-        } catch (e) {
-            currentInput = "Error";
-            shouldReset = true;
-            updateDisplay();
-        }
-    }
-
-    // Keyboard support
-    document.addEventListener('keydown', (e) => {
-        if (e.key >= '0' && e.key <= '9') inputDigit(e.key);
-        if (e.key === '.') inputDigit('.');
-        if (e.key === '+') inputOp('+');
-        if (e.key === '-') inputOp('-');
-        if (e.key === '*') inputOp('*');
-        if (e.key === '/') inputOp('/');
-        if (e.key === 'Enter') calculate();
-        if (e.key === 'Backspace') deleteLast();
-        if (e.key === 'Escape') clearDisplay();
-    });
-</script>
-
+      render();
+    })();
+  </script>
 </body>
 </html>
